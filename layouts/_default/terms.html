@@ -12,20 +12,22 @@
                 </div>
             </div>
         </a>
+        {{ range $key, $value := .Data.Terms }}
         
-        {{ range .Paginator.Pages }}
-                <a href="{{.Permalink}}" class="a-block">
-                    <div class="post-item-wrapper">
-                        <div class="post-item post-item-no-gaps">
-                            <div class="post-item-info-wrapper"> 
-                                <div class="post-item-title">
-                                    {{.Title}}
-                                </div>
-                            </div>
+        <a href="{{.Page.Permalink}}" class="a-block">
+            <div class="post-item-wrapper">
+                <div class="post-item post-item-no-gaps">
+                    <div class="post-item-info-wrapper"> 
+                        <div class="post-item-title">
+                            {{ .Page.Title }} ({{ .Count }})
                         </div>
                     </div>
-                </a>
+                </div>
+            </div>
+        </a>
+        
         {{ end }}
+
     </div>
 </div>
 
