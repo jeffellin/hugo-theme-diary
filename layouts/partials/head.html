@@ -31,13 +31,92 @@
 {{ template "_internal/google_analytics.html" . }}
 {{ end }}
 
+<script>
+(function(){
+	if (typeof self === 'undefined' || !self.Prism || !self.document) {
+		return;
+	}
+
+	if (!Prism.plugins.toolbar) {
+		console.warn('Copy to Clipboard plugin loaded before Toolbar plugin.');
+
+		return;
+	}
+
+	var ClipboardJS = window.ClipboardJS || undefined;
+
+	if (!ClipboardJS && typeof require === 'function') {
+		ClipboardJS = require('clipboard');
+	}
+
+	var callbacks = [];
+
+	if (!ClipboardJS) {
+		var script = document.createElement('script');
+		var head = document.querySelector('head');
+
+		script.onload = function() {
+			ClipboardJS = window.ClipboardJS;
+
+			if (ClipboardJS) {
+				while (callbacks.length) {
+					callbacks.pop()();
+				}
+			}
+		};
+
+		script.src = 'https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js';
+		head.apperndChild(script);
+	}
+
+	Prism.plugins.toolbar.registerButton('copy-to-clipboard', function (env) {
+		var linkCopy = document.createElement('button');
+		linkCopy.textContent = 'Copy';
+
+		if (!ClipboardJS) {
+			callbacks.push(registerClipboard);
+		} else {
+			registerClipboard();
+		}
+
+		return linkCopy;
+
+		function registerClipboard() {
+			var clip = new ClipboardJS(linkCopy, {
+				'text': function () {
+					return env.code;
+				}
+			});
+
+			clip.on('success', function() {
+				linkCopy.textContent = 'Copied!';
+
+				resetText();
+			});
+			clip.on('error', function () {
+				linkCopy.textContent = 'Press Ctrl+C to copy';
+
+				resetText();
+			});
+		}
+
+		function resetText() {
+			setTimeout(function () {
+				linkCopy.textContent = 'Copy';
+			}, 5000);
+		}
+	});
+})();
+
+</script>
 <script src="{{"/vendor/js/jquery.min.js" | relURL}}" ></script>
 <script src="{{"/vendor/js/popper.min.js" | relURL}}" ></script>
 <script src="{{"/vendor/js/bootstrap.min.js" | relURL}}" ></script>
 <script src="{{"/vendor/js/smooth-scroll.polyfills.min.js" | relURL}}" ></script>
-<link type="text/css" rel="stylesheet" href="{{"/vendor/css/bootstrap.min.css" | relURL}}">
 <script src="{{"/vendor/js/vue.min.js" | relURL}}" ></script>
-
+<script src="{{"/vendor/js/prism.js" | relURL}}" ></script>
+<pre data-src="plugins/toolbar/prism-toolbar.js" data-label="Hello World!"></pre>
+Select CodeHello World!
 {{if .Site.Params.manifest}}
 <link rel="manifest" href="{{.Site.Params.manifest}}">
 {{end}}
@@ -118,4 +197,6 @@ $(
 {{ end }}
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/cookieconsent@3/build/cookieconsent.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/ellin.css" />
+<link rel="stylesheet" type="text/css" href="/vendor/css/prism.css" />
+
 </head>
